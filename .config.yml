@@ -1,0 +1,25 @@
+server:
+  httpPort: 7860
+  host: 0.0.0.0
+  wsPort: 9998
+apiKeys: []
+streaming:
+  mode: fake
+features:
+  forceThinking: false
+  forceWebSearch: false
+  forceUrlContext: false
+accountSwitching:
+  failureThreshold: 3
+  switchOnUses: 40
+  immediateSwitchStatusCodes:
+    - 429
+    - 503
+retry:
+  maxRetries: 1
+  retryDelay: 2000
+concurrency:
+  maxConcurrentRequests: 4
+browser:
+  executablePath: ''
+  initialAuthIndex: 1

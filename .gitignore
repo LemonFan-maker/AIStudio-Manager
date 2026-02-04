@@ -1,0 +1,6 @@
+node_modules
+target
+camoufox/*
+config.yml
+auth/*
+dist
