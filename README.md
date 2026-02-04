@@ -66,9 +66,11 @@ pnpm install
 ```
 
 **对于Windows系统**
+
 在项目根目录新建 `camoufox`，下载 `https://github.com/daijro/camoufox/releases/download/v135.0.1-beta.24/camoufox-135.0.1-beta.24-win.x86_64.zip`，之后将其解压在新建的 `camoufox` 中。解压完毕应该可以在 `camoufox` 底下找到 `camoufox.exe` 这个程序。
 
 **对于Linux/MacOS系统**
+
 ```bash
 mkdir camoufox && cd camoufox
 wget https://github.com/daijro/camoufox/releases/download/v135.0.1-beta.24/camoufox-135.0.1-beta.24-lin.x86_64.zip
