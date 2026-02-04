@@ -238,8 +238,8 @@ export default function TokenStats() {
               <XAxis dataKey="date" />
               <YAxis tickFormatter={formatTokens} />
               <Tooltip
-                formatter={(value: number, name: string) => [
-                  formatTokens(value),
+                formatter={(value: any, name: any) => [
+                  formatTokens(value || 0),
                   `Model: ${name}`,
                 ]}
               />
@@ -275,8 +275,8 @@ export default function TokenStats() {
                 <YAxis tickFormatter={formatTokens} />
                 <Tooltip
                   cursor={{ fill: "rgba(255, 255, 255, 0.05)" }}
-                  formatter={(value: number, name: string) => [
-                    formatTokens(value),
+                  formatter={(value: any, name: any) => [
+                    formatTokens(value || 0),
                     name,
                   ]}
                 />
@@ -318,14 +318,14 @@ export default function TokenStats() {
                   paddingAngle={5}
                   dataKey="value"
                 >
-                  {stats.accountPie.map((entry, index) => (
+                  {stats.accountPie.map((_, index) => (
                     <Cell
                       key={`cell-${index}`}
                       fill={COLORS[index % COLORS.length]}
                     />
                   ))}
                 </Pie>
-                <Tooltip formatter={(value: number) => [formatTokens(value), "Tokens"]} />
+                <Tooltip formatter={(value: any) => [formatTokens(value || 0), "Tokens"]} />
                 <Legend />
               </PieChart>
             </ResponsiveContainer>

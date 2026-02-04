@@ -4,3 +4,4 @@ camoufox/*
 config.yml
 auth/*
 dist
+single-line-auth

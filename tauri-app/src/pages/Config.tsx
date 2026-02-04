@@ -37,14 +37,14 @@ interface ConfigData {
 }
 
 export default function Config() {
-  const [status, setStatus] = useState<SystemStatus | null>(null);
+  const [, setStatus] = useState<SystemStatus | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<{
     type: "success" | "error";
     text: string;
   } | null>(null);
-  const [apiKey, setApiKey] = useState("");
+  const [, setApiKey] = useState("");
   const [config, setConfig] = useState<ConfigData | null>(null);
   const [apiKeys, setApiKeys] = useState<string[]>([""]);
   const [showInitialSetup, setShowInitialSetup] = useState(false);
@@ -219,7 +219,7 @@ export default function Config() {
         setShowInitialSetup(false);
         setLoading(true);
         fetchStatus();
-        const interval = setInterval(fetchStatus, 5000);
+        setInterval(fetchStatus, 5000);
       } catch (err: any) {
         console.warn("认证失败或获取配置失败，尝试作为首次初始化处理...");
         
@@ -266,7 +266,7 @@ export default function Config() {
             setShowInitialSetup(false);
             setLoading(true);
             fetchStatus();
-            const interval = setInterval(fetchStatus, 5000);
+            setInterval(fetchStatus, 5000);
             setMessage({ type: "success", text: "配置已初始化，正在启动..." });
             return; // 初始化成功，结束函数
         } catch (saveErr) {
@@ -297,6 +297,7 @@ export default function Config() {
     }
   };
 
+  /*
   const handleToggle = async (
     action: () => Promise<string>,
     description: string
@@ -318,7 +319,9 @@ export default function Config() {
       setSaving(false);
     }
   };
+  */
 
+  /*
   const handleSetStreamMode = async (mode: "real" | "fake") => {
     await handleToggle(
       () => api.setStreamMode(mode),
@@ -330,6 +333,7 @@ export default function Config() {
     api.saveApiKey(apiKey);
     setMessage({ type: "success", text: "API Key 已保存到本地" });
   };
+  */
 
   const handleApplyBaseUrl = () => {
     if (!apiBaseUrl.trim()) {
@@ -479,11 +483,6 @@ export default function Config() {
       </div>
     );
   }
-
-  const isReal = status?.streamingMode.includes("real");
-  const hasThinking = status?.forceThinking.includes("✅");
-  const hasWebSearch = status?.forceWebSearch.includes("✅");
-  const hasUrlContext = status?.forceUrlContext.includes("✅");
 
   return (
     <div className="p-8">

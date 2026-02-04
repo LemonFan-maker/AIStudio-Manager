@@ -1035,6 +1035,30 @@ class RequestHandler {
     // 初始化流量日志记录
     this.trafficLogs = [];
     this.maxTrafficLogs = 1000; // 最多保存1000条日志
+    this.trafficLogFile = path.join(__dirname, "traffic.json");
+    this._loadTrafficLogs();
+  }
+
+  _loadTrafficLogs() {
+    try {
+      if (fs.existsSync(this.trafficLogFile)) {
+        const data = fs.readFileSync(this.trafficLogFile, "utf-8");
+        this.trafficLogs = JSON.parse(data);
+        this.logger.info(`[Traffic] 已加载 ${this.trafficLogs.length} 条历史流量日志。`);
+      }
+    } catch (error) {
+      this.logger.warn(`[Traffic] 加载流量日志失败: ${error.message}`);
+      this.trafficLogs = [];
+    }
+  }
+
+  _saveTrafficLogs() {
+    try {
+      const data = JSON.stringify(this.trafficLogs, null, 2);
+      fs.writeFileSync(this.trafficLogFile, data, "utf-8");
+    } catch (error) {
+      this.logger.warn(`[Traffic] 保存流量日志失败: ${error.message}`);
+    }
   }
 
   get currentAuthIndex() {
@@ -1930,6 +1954,8 @@ class RequestHandler {
       if (this.trafficLogs.length > this.maxTrafficLogs) {
         this.trafficLogs = this.trafficLogs.slice(-this.maxTrafficLogs);
       }
+
+      this._saveTrafficLogs();
     } catch (error) {
       this.logger.warn(`[Traffic] 记录流量日志失败: ${error.message}`);
     }

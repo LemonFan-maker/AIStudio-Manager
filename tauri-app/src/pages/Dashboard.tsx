@@ -21,25 +21,30 @@ interface StatCardProps {
 
 function StatCard({ title, value, icon, trend, status }: StatCardProps) {
   const statusColors = {
-    success: "text-green-500",
-    warning: "text-yellow-500",
-    error: "text-red-500",
+    success: "text-emerald-600 bg-emerald-100 dark:bg-emerald-900/30 dark:text-emerald-400",
+    warning: "text-amber-600 bg-amber-100 dark:bg-amber-900/30 dark:text-amber-400",
+    error: "text-rose-600 bg-rose-100 dark:bg-rose-900/30 dark:text-rose-400",
+    default: "text-blue-600 bg-blue-100 dark:bg-blue-900/30 dark:text-blue-400"
   };
 
+  const colorClass = status ? statusColors[status] : statusColors.default;
+
   return (
-    <div className="rounded-lg border border-border bg-card p-6">
+    <div className="relative overflow-hidden rounded-xl border border-border/50 bg-card p-6 shadow-sm transition-all duration-200 hover:shadow-md hover:border-border">
       <div className="flex items-center justify-between">
-        <div>
+        <div className="space-y-1">
           <p className="text-sm font-medium text-muted-foreground">{title}</p>
-          <p className="mt-2 text-3xl font-bold">{value}</p>
+          <div className="flex items-baseline gap-2">
+            <span className="text-2xl font-bold tracking-tight">{value}</span>
+          </div>
           {trend && (
-            <p className="mt-1 text-sm text-muted-foreground">{trend}</p>
+            <p className="text-xs text-muted-foreground">{trend}</p>
           )}
         </div>
         <div
           className={cn(
-            "rounded-full bg-primary/10 p-3",
-            status && statusColors[status]
+            "rounded-xl p-3 transition-transform duration-200 hover:scale-105",
+            colorClass
           )}
         >
           {icon}
@@ -109,10 +114,15 @@ export default function Dashboard() {
   const currentFailure = failureMatch ? parseInt(failureMatch[1]) : 0;
 
   return (
-    <div className="p-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">仪表盘</h1>
-        <p className="mt-2 text-muted-foreground">实时监控系统运行状态</p>
+    <div className="space-y-6 p-8 max-w-[1600px] mx-auto animate-in fade-in duration-500">
+      <div className="flex items-end justify-between border-b border-border/40 pb-6">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-foreground">仪表盘</h1>
+          <p className="mt-2 text-muted-foreground">实时监控系统运行状态与核心指标</p>
+        </div>
+        <div className="hidden sm:block text-xs text-muted-foreground bg-muted/50 px-3 py-1 rounded-full">
+            系统状态概览
+        </div>
       </div>
 
       {/* 状态卡片网格 */}
@@ -127,108 +137,140 @@ export default function Dashboard() {
           title="当前账号"
           value={`#${status.currentAuthIndex}`}
           icon={<Users className="h-6 w-6" />}
-          trend={`总共 ${status.accountDetails.length} 个账号`}
+          trend={`账号池总数: ${status.accountDetails.length}`}
         />
         <StatCard
           title="在途/排队请求"
-          value={`${status.activeRequests}/${status.pendingRequests}`}
+          value={`${status.activeRequests} / ${status.pendingRequests}`}
           icon={<Zap className="h-6 w-6" />}
           trend={`最大并发: ${status.maxConcurrentRequests}`}
         />
         <StatCard
-          title="使用/失败计数"
-          value={`${currentUsage}/${currentFailure}`}
+          title="每日使用/失败"
+          value={`${currentUsage} / ${currentFailure}`}
           icon={<TrendingUp className="h-6 w-6" />}
           status={currentFailure > 0 ? "warning" : "success"}
         />
       </div>
 
-      {/* 详细信息卡片 */}
-      <div className="mt-8 grid gap-6 lg:grid-cols-2">
+      <div className="grid gap-6 lg:grid-cols-2">
         {/* 服务配置 */}
-        <div className="rounded-lg border border-border bg-card p-6">
-          <h2 className="mb-4 text-xl font-semibold">服务配置</h2>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">流式模式</span>
-              <span className="text-sm font-medium">{status.streamingMode}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">强制推理</span>
-              <span className="text-sm font-medium">{status.forceThinking}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">强制联网</span>
-              <span className="text-sm font-medium">{status.forceWebSearch}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">强制网址上下文</span>
-              <span className="text-sm font-medium">{status.forceUrlContext}</span>
-            </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">API 密钥</span>
-              <span className="text-sm font-medium">{status.apiKeySource}</span>
-            </div>
+        <div className="overflow-hidden rounded-xl border border-border/50 bg-card shadow-sm transition-all hover:shadow-md">
+          <div className="border-b border-border/50 bg-muted/30 p-5">
+            <h2 className="text-lg font-semibold flex items-center gap-2">
+                <span className="h-4 w-1 bg-primary rounded-full"></span>
+                服务配置
+            </h2>
+          </div>
+          <div className="divide-y divide-border/50">
+            {[
+                { label: "流式模式", value: status.streamingMode },
+                { label: "强制推理", value: status.forceThinking },
+                { label: "强制联网", value: status.forceWebSearch },
+                { label: "强制网址上下文", value: status.forceUrlContext },
+                { label: "API 密钥", value: status.apiKeySource, highlight: true }
+            ].map((item, i) => (
+                <div key={i} className="grid grid-cols-2 p-4 hover:bg-muted/50 transition-colors items-center">
+                    <span className="text-sm font-medium text-muted-foreground">{item.label}</span>
+                    <span className={cn(
+                        "text-sm font-medium text-right",
+                        item.highlight && "bg-primary/10 text-primary px-2 py-0.5 rounded w-fit justify-self-end font-mono"
+                    )}>{item.value}</span>
+                </div>
+            ))}
           </div>
         </div>
 
         {/* 账号状态 */}
-        <div className="rounded-lg border border-border bg-card p-6">
-          <h2 className="mb-4 text-xl font-semibold">账号状态</h2>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">使用次数计数</span>
-              <span className="text-sm font-medium">{status.usageCount}</span>
+        <div className="overflow-hidden rounded-xl border border-border/50 bg-card shadow-sm transition-all hover:shadow-md">
+          <div className="border-b border-border/50 bg-muted/30 p-5">
+            <h2 className="text-lg font-semibold flex items-center gap-2">
+                 <span className="h-4 w-1 bg-indigo-500 rounded-full"></span>
+                运行指标
+            </h2>
+          </div>
+          <div className="divide-y divide-border/50">
+            <div className="grid grid-cols-2 p-4 hover:bg-muted/50 transition-colors items-center">
+              <span className="text-sm font-medium text-muted-foreground">使用次数计数</span>
+              <span className="text-sm font-medium text-right font-mono">{status.usageCount}</span>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">连续失败计数</span>
-              <span className="text-sm font-medium">{status.failureCount}</span>
+            <div className="grid grid-cols-2 p-4 hover:bg-muted/50 transition-colors items-center">
+              <span className="text-sm font-medium text-muted-foreground">连续失败计数</span>
+              <span className="text-sm font-medium text-right font-mono">{status.failureCount}</span>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">扫描到的总账号</span>
-              <span className="text-sm font-medium">{status.initialIndices}</span>
+            <div className="grid grid-cols-2 p-4 hover:bg-muted/50 transition-colors items-center">
+              <span className="text-sm font-medium text-muted-foreground">扫描到的总账号</span>
+              <span className="text-sm font-medium text-right">{status.initialIndices}</span>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">格式错误账号</span>
-              <span className="text-sm font-medium">{status.invalidIndices}</span>
+            <div className="grid grid-cols-2 p-4 hover:bg-muted/50 transition-colors items-center">
+              <span className="text-sm font-medium text-muted-foreground">格式错误账号</span>
+              <span className="text-sm font-medium text-right">{status.invalidIndices}</span>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">立即切换状态码</span>
-              <span className="text-sm font-medium">
-                {status.immediateSwitchStatusCodes}
-              </span>
+            <div className="flex flex-col p-4 gap-2 hover:bg-muted/50 transition-colors">
+              <span className="text-sm font-medium text-muted-foreground">立即切换状态码</span>
+              <div className="flex flex-wrap gap-1 mt-1">
+                 {status.immediateSwitchStatusCodes?.replace(/[\[\]]/g, '').split(',').filter((x: string) => x.trim()).map((code: string) => (
+                     <span key={code} className="inline-flex items-center rounded-md bg-secondary px-2 py-1 text-xs font-medium text-secondary-foreground ring-1 ring-inset ring-border">
+                         {code.trim()}
+                     </span>
+                 ))}
+              </div>
             </div>
           </div>
         </div>
       </div>
 
       {/* 账号详情列表 */}
-      <div className="mt-8 rounded-lg border border-border bg-card p-6">
-        <h2 className="mb-4 text-xl font-semibold">账号列表</h2>
-        <div className="space-y-2">
-          {status.accountDetails.map((account) => (
-            <div
-              key={account.index}
-              className={cn(
-                "flex items-center justify-between rounded-lg border p-3",
-                account.index === status.currentAuthIndex
-                  ? "border-primary bg-primary/5"
-                  : "border-border"
-              )}
-            >
-              <div className="flex items-center gap-3">
-                {account.index === status.currentAuthIndex ? (
-                  <CheckCircle className="h-5 w-5 text-primary" />
-                ) : (
-                  <Clock className="h-5 w-5 text-muted-foreground" />
+      <div className="overflow-hidden rounded-xl border border-border/50 bg-card shadow-sm transition-all hover:shadow-md">
+        <div className="border-b border-border/50 bg-muted/30 p-5">
+            <h2 className="text-lg font-semibold flex items-center gap-2">
+                 <span className="h-4 w-1 bg-emerald-500 rounded-full"></span>
+                账号列表详情
+            </h2>
+        </div>
+        <div className="p-6">
+            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {status.accountDetails.map((account) => (
+                <div
+                key={account.index}
+                className={cn(
+                    "group relative flex items-center space-x-3 rounded-xl border p-4 shadow-sm transition-all hover:shadow-md",
+                    account.index === status.currentAuthIndex
+                    ? "border-primary/50 bg-primary/5 ring-1 ring-primary/20"
+                    : "border-border/60 bg-card hover:border-primary/30 hover:bg-accent/5"
                 )}
-                <span className="font-medium">账号 #{account.index}</span>
-              </div>
-              <span className="text-sm text-muted-foreground">
-                {account.name}
-              </span>
+                >
+                <div className="flex-shrink-0">
+                    {account.index === status.currentAuthIndex ? (
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary/10 text-primary shadow-inner">
+                        <CheckCircle className="h-5 w-5" />
+                    </div>
+                    ) : (
+                    <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                        <Clock className="h-5 w-5" />
+                    </div>
+                    )}
+                </div>
+                <div className="min-w-0 flex-1">
+                    <div className="focus:outline-none">
+                        <span className="absolute inset-0" aria-hidden="true" />
+                        <p className="text-sm font-semibold text-foreground">
+                        账号 #{account.index}
+                        </p>
+                        <p className="truncate text-xs text-muted-foreground mt-0.5" title={account.name}>
+                        {account.name}
+                        </p>
+                    </div>
+                </div>
+                {account.index === status.currentAuthIndex && (
+                    <span className="absolute top-2 right-2 flex h-2 w-2">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2 w-2 bg-primary"></span>
+                    </span>
+                )}
+                </div>
+            ))}
             </div>
-          ))}
         </div>
       </div>
     </div>

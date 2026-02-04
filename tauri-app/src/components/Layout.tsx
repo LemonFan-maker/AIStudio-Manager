@@ -21,7 +21,7 @@ const navItems = [
 
 export default function Layout() {
   return (
-    <div className="flex h-screen bg-background">
+    <div className="flex h-screen bg-slate-50 dark:bg-background">
       {/* 侧边栏 */}
       <aside className="w-64 border-r border-border bg-card">
         <div className="flex h-16 items-center gap-2 border-b border-border px-6">
