@@ -5,3 +5,4 @@ config.yml
 auth/*
 dist
 single-line-auth
+traffic.json

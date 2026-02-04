@@ -1036,6 +1036,7 @@ class RequestHandler {
     this.trafficLogs = [];
     this.maxTrafficLogs = 1000; // 最多保存1000条日志
     this.trafficLogFile = path.join(__dirname, "traffic.json");
+    this.logger.info(`[Traffic] 流量日志存储路径: ${this.trafficLogFile}`);
     this._loadTrafficLogs();
   }
 
