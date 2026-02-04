@@ -1,299 +1,232 @@
-# AIStudio Manager
+<div align="center">
 
-AIStudio Manager 是一个强大的 Google AI Studio 账号管理和 API 代理系统，提供多账号切换、流量统计、Token 消耗分析等功能。
+# 🤖 AIStudio Manager
 
-## 主要功能
+**Google AI Studio 账号管理与 API 代理的终极解决方案**
 
-- **多账号管理**: 管理多个 Google AI Studio 账号，支持实时切换
-- **API 代理**: 代理 Google Generative AI API 请求，支持流式和非流式模式
-- **智能切换**: 根据错误率或使用次数自动切换账号
-- **流量统计**: 实时记录和分析 API 调用流量
-- **Token 分析**: 按模型统计 Input/Output Token 消耗，生成详细报告
-- **配置管理**: 灵活的 YAML 配置系统，支持环境变量覆盖
-- **Web 界面**: 基于 Tauri + React 的现代化桌面管理界面
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Node.js](https://img.shields.io/badge/Node.js-16%2B-green.svg)](https://nodejs.org/)
+[![Tauri](https://img.shields.io/badge/Tauri-v2-orange.svg)](https://tauri.app/)
+[![React](https://img.shields.io/badge/Frontend-React-61dafb.svg)](https://react.js.org/)
 
-## 项目结构
+[主要功能](#-主要功能) •
+[界面预览](#-界面预览) •
+[快速开始](#-快速开始) •
+[配置文档](#-配置说明) •
+[API 参考](#-api-端点)
 
-```
-AIStudio2API/
-├── auth
-├── black-browser.js
-├── config-loader.js
-├── config-manager.js
-├── config.yml
-├── LICENSE
-├── models.json
-├── package.json
-├── pnpm-lock.yaml
-├── README.md
-├── save-auth.js
-├── tauri-app
-│   ├── index.html
-│   ├── package.json
-│   ├── pnpm-lock.yaml
-│   ├── pnpm-workspace.yaml
-│   ├── postcss.config.js
-│   ├── src
-│   │   ├── App.tsx
-│   │   ├── components
-│   │   │   └── Layout.tsx
-│   │   ├── index.css
-│   │   ├── lib
-│   │   │   ├── api.ts
-│   │   │   └── utils.ts
-│   │   ├── main.tsx
-│   │   └── pages
-│   │       ├── Accounts.tsx
-│   │       ├── Config.tsx
-│   │       ├── Dashboard.tsx
-│   │       ├── Logs.tsx
-│   │       ├── TokenStats.tsx
-│   │       └── Traffic.tsx
-│   ├── src-tauri
-│   │   ├── build.rs
-│   │   ├── Cargo.lock
-│   │   ├── Cargo.toml
-│   │   ├── gen
-│   │   │   └── schemas
-│   │   │       ├── acl-manifests.json
-│   │   │       ├── capabilities.json
-│   │   │       ├── desktop-schema.json
-│   │   │       └── linux-schema.json
-│   │   ├── icons
-│   │   │   ├── 128x128@2x.png
-│   │   │   ├── 128x128.png
-│   │   │   ├── 32x32.png
-│   │   │   ├── icon.icns
-│   │   │   ├── icon.ico
-│   │   │   ├── icon.png
-│   │   │   └── Square512x512Logo.png
-│   │   ├── src
-│   │   │   ├── lib.rs
-│   │   │   └── main.rs
-│   │   └── tauri.conf.json
-│   ├── start.sh
-│   ├── tailwind.config.js
-│   ├── tsconfig.json
-│   ├── tsconfig.node.json
-│   └── vite.config.ts
-└── unified-server.js
-```
+</div>
 
-## 快速开始
+---
+
+**AIStudio Manager** 是一个功能强大的中间件系统，旨在解决 Google AI Studio 在生产环境下的稳定性与管理问题。它集成了多账号轮询、自动故障转移、Token 消耗深度分析以及现代化的桌面管理界面，助你构建高可用的 AI 服务。
+
+## ✨ 主要功能
+
+| 功能模块 | 描述 |
+| :--- | :--- |
+| 🔐 **多账号池管理** | 支持导入和管理无限个 Google 账号，实现高并发下的负载均衡。 |
+| 🔄 **智能故障转移** | 遇到 429/503 错误或达到使用阈值时，自动切换至健康账号。 |
+| ⚡ **API 代理增强** | 完美兼容 Google Generative AI API。 |
+| 📊 **全链路监控** | 实时可视化流量大屏，记录每一次 API 调用的耗时、状态与模型分布。 |
+| 📉 **Token 审计** | 精确到 Input/Output 的 Token 消耗统计，生成可视化趋势报告。 |
+| ⚙️ **灵活配置** | 支持 YAML 配置文件热重载与环境变量（ENV）覆盖，适应容器化部署。 |
+| 🖥️ **跨平台客户端** | 基于 Tauri + React 构建的现代化桌面应用，操作丝滑。 |
+
+---
+
+## 📸 界面预览
+
+以下是 AIStudio Manager 的核心界面展示：
+
+| **仪表盘 (Dashboard)** | **账号管理 (Accounts)** |
+| :---: | :---: |
+| ![Dashboard Screenshot](assets/fig1.png) <br> *实时系统状态与快速统计* | ![Accounts Screenshot](assets/fig2.png) <br> *账号状态监控与导入* |
+| **流量统计 (Traffic)** | **Token 分析 (Token Stats)** |
+| ![Traffic Screenshot](assets/fig3.png) <br> *API 调用时间线与状态码分布* | ![Token Stats Screenshot](assets/fig4.png) <br> *模型 Input/Output 消耗分析* |
+| **系统日志 (Logs)** | **高级配置 (Settings)** |
+| ![Logs Screenshot](assets/fig5.png) <br> *实时运行日志追踪* | ![Config Screenshot](assets/fig6.png) <br> *API Key 与系统参数设置* |
+
+---
+
+## 🚀 快速开始
 
 ### 前置要求
+* **Node.js**: 16.0 或更高版本
+* **pnpm**: 包管理工具
+* **Rust**: 仅用于构建 Tauri 桌面端
 
-- Node.js 16+
-- pnpm
-- Rust (仅用于构建 Tauri)
+### 安装与运行
 
-### 安装步骤
+#### 1. 克隆项目
+```bash
+git clone https://github.com/LemonFan-maker/AIStudio-Manager.git
+cd AIStudio-Manager
+pnpm install
+```
 
-1. 克隆项目并安装依赖
+**对于Windows系统**
+在项目根目录新建 `camoufox`，下载 `https://github.com/daijro/camoufox/releases/download/v135.0.1-beta.24/camoufox-135.0.1-beta.24-win.x86_64.zip`，之后将其解压在新建的 `camoufox` 中。解压完毕应该可以在 `camoufox` 底下找到 `camoufox.exe` 这个程序。
+
+**对于Linux/MacOS系统**
+```bash
+mkdir camoufox && cd camoufox
+wget https://github.com/daijro/camoufox/releases/download/v135.0.1-beta.24/camoufox-135.0.1-beta.24-lin.x86_64.zip
+unzip camoufox-135.0.1-beta.24-lin.x86_64.zip
+```
+
+解压完毕应该可以在 `camoufox` 底下找到 `camoufox` 这个程序。
+
+#### 2. 初始化配置
+
+复制示例配置文件：
 
 ```bash
-git clone https://github.com/LemonFan-maker/AIStudio2API.git
-cd AIStudio2API
-pnpm install
-
 cp .config.yml config.yml
 ```
 
+#### 3. 启动后端服务
 
-1. 启动后端服务
+后端核心服务负责代理与调度：
 
 ```bash
 node server.js
+# 服务默认在 http://localhost:7860 启动
 ```
 
-服务器将在 `http://localhost:7860` 启动。
+#### 4. 启动管理客户端
 
-4. 启动前端应用
+在新的终端窗口中启动桌面端：
 
 ```bash
 cd tauri-app
 pnpm tauri dev
 ```
 
-## 配置说明
+---
 
-### config.yml 配置选项
+## 🛠 配置说明
+
+核心配置文件位于根目录的 `config.yml`。
+
+### 核心参数 (`config.yml`)
 
 ```yaml
 server:
-  httpPort: 7860          # HTTP 服务端口
-  host: 0.0.0.0          # 监听地址
-  wsPort: 9998           # WebSocket 端口
+  httpPort: 7860          # 核心服务端口
+  wsPort: 9998            # WebSocket 通信端口
 
 streaming:
-  mode: real             # real 或 fake
-
-features:
-  forceThinking: false   # 强制启用思维推理
-  forceWebSearch: false  # 强制启用联网搜索
-  forceUrlContext: false # 强制上传 URL 上下文
+  mode: real              # 模式: 'real' (真实流) 或 'fake' (模拟流)
 
 accountSwitching:
-  failureThreshold: 3    # 失败次数阈值
-  switchOnUses: 40       # 使用次数阈值
-  immediateSwitchStatusCodes: [429, 503]
+  failureThreshold: 3     # 连续失败多少次后切换账号
+  switchOnUses: 40        # 单个账号使用多少次后轮换
+  immediateSwitchStatusCodes: [429, 503] # 触发立即切换的状态码
 
 retry:
-  maxRetries: 1          # 最大重试次数
-  retryDelay: 2000       # 重试延迟（毫秒）
+  maxRetries: 1           # 请求失败重试次数
+  retryDelay: 2000        # 重试间隔 (ms)
 
 concurrency:
-  maxConcurrentRequests: 3
-
-browser:
-  executablePath: null   # Firefox 可执行路径
-  initialAuthIndex: 1    # 初始账号索引
-
-apiKeys:
-  - your-api-key-here
-
-models:
-  - gemini-1.5-pro-latest
+  maxConcurrentRequests: 3 # 最大并发请求数
 ```
 
-### 环境变量
+### 环境变量 (Environment Variables)
 
-支持以下环境变量覆盖配置：
+支持使用环境变量覆盖默认配置，适合 Docker 部署：
 
-- `PORT` - HTTP 服务端口
-- `HOST` - 监听地址
-- `STREAMING_MODE` - 流式模式
-- `API_KEYS` - 逗号分隔的 API Key
-- `FAILURE_THRESHOLD` - 失败阈值
-- `SWITCH_ON_USES` - 切换阈值
-- `MAX_RETRIES` - 最大重试次数
-- `INITIAL_AUTH_INDEX` - 初始账号索引
-- `FORCE_THINKING` - 强制思维推理
-- `FORCE_WEB_SEARCH` - 强制联网搜索
+| 变量名 | 描述 | 默认值 |
+| --- | --- | --- |
+| `PORT` | HTTP 服务端口 | `7860` |
+| `API_KEYS` | 系统访问鉴权 Key (逗号分隔) | - |
+| `STREAMING_MODE` | 流式模式 (`real`/`fake`) | `real` |
+| `FAILURE_THRESHOLD` | 账号故障切换阈值 | `3` |
+| `SWITCH_ON_USES` | 账号轮换使用次数阈值 | `40` |
 
-## 使用指南
+---
 
-### 添加账号
+## 📖 使用指南
 
-1. 运行 `save-auth.js` 脚本采集账号信息
-2. 在 Web 界面"账号管理"页面上传 storageState.json
-3. 系统自动验证并保存账号
+### 1. 账号录入
 
-### 管理 API Key
-
-1. 打开"配置"页面
-2. 输入 API Key（默认为 123456）
-3. 系统自动验证并保存
-
-### 查看统计数据
-
-- **仪表盘**: 实时系统状态和快速统计
-- **流量统计**: 按时间线查看 API 调用记录
-- **Token 统计**: 按模型分析 Token 消耗情况，包括趋势图表
-
-### API 端点
-
-#### 系统端点
-
-- `GET /api/status` - 获取系统状态
-- `GET /api/config` - 获取配置
-- `POST /api/config` - 更新配置
-- `POST /api/save-config` - 保存配置到文件
-- `GET /api/models` - 获取支持的模型列表
-
-#### 账号端点
-
-- `GET /api/auth/status` - 获取账号状态
-- `POST /api/auth/upload` - 上传新账号
-- `POST /api/auth/switch/:index` - 切换账号
-
-#### 流量端点
-
-- `GET /api/traffic/logs` - 获取流量日志
-- `GET /api/traffic/summary` - 获取流量摘要
-
-#### 代理端点
-
-- `POST /v1beta/models/:model/generateContent` - 调用 API
-
-## 工作原理
-
-### 账号切换流程
-
-1. 系统记录每个账号的使用情况（错误率、调用次数）
-2. 当账号达到失败阈值或使用次数阈值时触发切换
-3. 自动切换到可用的下一个账号
-4. 特定 HTTP 状态码（如 429、503）导致立即切换
-
-### 流量记录
-
-系统记录以下信息：
-- 请求时间戳
-- 使用的模型
-- 账号索引
-- HTTP 状态码
-- Input/Output Token 消耗
-
-### Token 消耗计算
-
-从 API 响应中提取 `usageMetadata`：
-- `promptTokenCount` - Input Token
-- `candidatesTokenCount` - Output Token
-
-## 故障排除
-
-### 连接失败
-
-检查后端是否正常运行：
+1. 运行项目根目录下的脚本采集账号 Cookie：
 ```bash
-curl http://localhost:7860/api/status
+node save-auth.js
 ```
 
-### API Key 无效
 
-确保 API Key 正确配置，并有有效的 Google AI Studio 账号。
+2. 或者在 Web 界面的 **"账号管理"** 页面，直接上传 `storageState.json` 文件。
+3. 系统会自动验证有效性并存入 `auth/` 目录。
 
-### 账号切换不工作
+### 2. 对接 API
 
-1. 检查 `auth/` 目录下是否有账号文件
-2. 检查切换阈值配置
-3. 查看日志了解具体错误
+AIStudio Manager 提供了与 Google 官方一致的 API 路径。
 
-### 流量统计显示为 0
+**Base URL:** `http://localhost:7860`
 
-确保请求包含有效的 Token 使用元数据。后端会自动从流式响应中提取。
+**示例调用 (cURL):**
 
-## 开发
-
-### 本地开发
-
-前端：
 ```bash
-cd tauri-app
-pnpm dev
+curl -X POST "http://localhost:7860/v1beta/models/gemini-1.5-pro:generateContent?key=YOUR_SYS_KEY" \
+-H "Content-Type: application/json" \
+-d '{
+    "contents": [{"parts": [{"text": "Hello, world"}]}]
+}'
 ```
 
-后端：
-```bash
-node server.js
+---
+
+## 📡 API 端点参考
+
+### 🖥️ 系统与管理
+
+* `GET /api/status` - 获取系统整体健康状态
+* `GET /api/config` - 获取当前配置
+* `POST /api/config` - 热更新配置
+* `GET /api/models` - 获取可用模型列表
+
+### 🔐 账号控制
+
+* `GET /api/auth/status` - 查看所有账号的活跃状态与错误率
+* `POST /api/auth/upload` - 动态上传新账号凭证
+* `POST /api/auth/switch/:index` - 强制切换到指定索引的账号
+
+### 🚦 流量与日志
+
+* `GET /api/traffic/logs` - 获取详细的 API 请求日志
+* `GET /api/traffic/summary` - 获取 Token 消耗摘要
+
+---
+
+## 📂 项目结构
+
+<details>
+<summary>点击展开查看完整目录结构</summary>
+
+```
+AIStudio2API/
+├── auth/                  # 存放账号凭证 (自动生成)
+├── tauri-app/             # 前端 Tauri + React 项目
+│   ├── src/               # React 源代码
+│   └── src-tauri/         # Rust 后端代码
+├── config.yml             # 主配置文件
+├── server.js              # 后端主入口
+├── unified-server.js      # 统一服务逻辑
+├── black-browser.js       # 浏览器指纹模拟模块
+├── config-manager.js      # 配置管理模块
+└── save-auth.js           # 账号采集脚本
+
 ```
 
-### 构建生产版本
+</details>
 
-前端：
-```bash
-cd tauri-app
-pnpm build
-```
+---
 
-## 许可证
+## 📄 许可证
 
-MIT
+本项目采用 [MIT License](https://www.google.com/search?q=LICENSE) 许可证。
 
-## 支持
-
-遇到问题？提交 Issue 或查看日志获取更多信息。
-
-日志位置：
-- 后端：控制台输出和 `server.js` 日志
-- 前端：浏览器开发者工具控制台
+<div align="center">
+Made with ❤️ by LemonFan-maker(OrionisLi)
+</div>
