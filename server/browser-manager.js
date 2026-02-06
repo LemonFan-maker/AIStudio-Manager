@@ -131,6 +131,19 @@ class BrowserManager {
                 }
             });
 
+            // --- 加速页面加载 ---
+            await this.page.route("**/*", (route) => {
+                const request = route.request();
+                const resourceType = request.resourceType();
+                // 仅拦截图片和媒体，放行样式表(stylesheet)和字体(font)
+                // 拦截 CSS 会导致 Monaco Editor 加载失败，拦截字体可能导致图标缺失
+                if (["image", "media"].includes(resourceType)) {
+                    return route.abort();
+                }
+                return route.continue();
+            });
+            this.logger.info("[Browser] 已启用资源拦截 (Image/Font/CSS/Media),加速页面加载");
+
             this.logger.info(`[Browser] 正在导航至目标网页...`);
             const targetUrl =
                 "https://aistudio.google.com/u/0/apps/bundled/blank?showPreview=true&showCode=true&showAssistant=true";
@@ -140,7 +153,9 @@ class BrowserManager {
             });
             this.logger.info("[Browser] 页面加载完成。");
 
-            await this.page.waitForTimeout(3000);
+            // 优化：Google AI Studio 可能会一直有后台请求，导致 networkidle 超时(浪费5秒)。
+            // 改为固定等待 2秒，既比原来的 3秒快，又避免了 5秒超时。
+            await this.page.waitForTimeout(2000);
 
             const currentUrl = this.page.url();
             let pageTitle = "";
@@ -191,11 +206,11 @@ class BrowserManager {
             }
 
             this.logger.info(
-                `[Browser] 进入 5秒 检查流程 (目标: Cookie + Got it + 新手引导)...`
+                `[Browser] 进入 3秒 检查流程 (目标: Cookie + Got it + 新手引导)...`
             );
 
             const startTime = Date.now();
-            const timeLimit = 5000;
+            const timeLimit = 3000; // 优化: 减少到3秒
 
             // 状态记录表
             const popupStatus = {
@@ -204,62 +219,67 @@ class BrowserManager {
                 guide: false,
             };
 
+            // 优化: 并行检查弹窗
             while (Date.now() - startTime < timeLimit) {
-                // 如果3个都处理过了，立刻退出 ---
+                // 如果3个都处理过了,立刻退出
                 if (popupStatus.cookie && popupStatus.gotIt && popupStatus.guide) {
                     this.logger.info(
-                        `[Browser] 3个弹窗全部处理完毕，提前进入下一步。`
+                        `[Browser] 3个弹窗全部处理完毕,提前进入下一步。`
                     );
                     break;
                 }
 
-                let clickedInThisLoop = false;
+                // 并行检查所有弹窗
+                const checks = [];
 
                 // 1. 检查 Cookie "Agree" (如果还没点过)
                 if (!popupStatus.cookie) {
-                    try {
-                        const agreeBtn = this.page.locator('button:text("Agree")').first();
-                        if (await agreeBtn.isVisible({ timeout: 100 })) {
-                            await agreeBtn.click({ force: true });
-                            this.logger.info(`[Browser] (1/3) 点击了 "Cookie Agree"`);
-                            popupStatus.cookie = true;
-                            clickedInThisLoop = true;
-                        }
-                    } catch (e) { }
+                    checks.push(
+                        this.page.locator('button:text("Agree")').first()
+                            .click({ timeout: 200, force: true })
+                            .then(() => {
+                                this.logger.info(`[Browser] (1/3) 点击了 "Cookie Agree"`);
+                                popupStatus.cookie = true;
+                                return true;
+                            })
+                            .catch(() => false)
+                    );
                 }
 
                 // 2. 检查 "Got it" (如果还没点过)
                 if (!popupStatus.gotIt) {
-                    try {
-                        const gotItBtn = this.page
-                            .locator('div.dialog button:text("Got it")')
-                            .first();
-                        if (await gotItBtn.isVisible({ timeout: 100 })) {
-                            await gotItBtn.click({ force: true });
-                            this.logger.info(`[Browser] (2/3) 点击了 "Got it" 弹窗`);
-                            popupStatus.gotIt = true;
-                            clickedInThisLoop = true;
-                        }
-                    } catch (e) { }
+                    checks.push(
+                        this.page.locator('div.dialog button:text("Got it")').first()
+                            .click({ timeout: 200, force: true })
+                            .then(() => {
+                                this.logger.info(`[Browser] (2/3) 点击了 "Got it" 弹窗`);
+                                popupStatus.gotIt = true;
+                                return true;
+                            })
+                            .catch(() => false)
+                    );
                 }
 
                 // 3. 检查 新手引导 "Close" (如果还没点过)
                 if (!popupStatus.guide) {
-                    try {
-                        const closeBtn = this.page
-                            .locator('button[aria-label="Close"]')
-                            .first();
-                        if (await closeBtn.isVisible({ timeout: 100 })) {
-                            await closeBtn.click({ force: true });
-                            this.logger.info(`[Browser] (3/3) 点击了 "新手引导关闭" 按钮`);
-                            popupStatus.guide = true;
-                            clickedInThisLoop = true;
-                        }
-                    } catch (e) { }
+                    checks.push(
+                        this.page.locator('button[aria-label="Close"]').first()
+                            .click({ timeout: 200, force: true })
+                            .then(() => {
+                                this.logger.info(`[Browser] (3/3) 点击了 "新手引导关闭" 按钮`);
+                                popupStatus.guide = true;
+                                return true;
+                            })
+                            .catch(() => false)
+                    );
                 }
 
-                // 如果本轮点击了按钮，稍微等一下动画；如果没点，等待1秒避免死循环空转
-                await this.page.waitForTimeout(clickedInThisLoop ? 500 : 1000);
+                // 等待所有检查完成
+                const results = await Promise.allSettled(checks);
+                const anyClicked = results.some(r => r.status === 'fulfilled' && r.value === true);
+
+                // 如果本轮点击了按钮,稍微等一下动画;如果没点,等待500ms避免死循环空转
+                await this.page.waitForTimeout(anyClicked ? 300 : 500);
             }
 
             this.logger.info(
@@ -306,7 +326,7 @@ class BrowserManager {
                         `  [尝试 ${i}/5] 点击失败: ${error.message.split("\n")[0]}`
                     );
                     if (i === 5) {
-                        // [新增截图] 在最终失败时保存截图
+                        // 在最终失败时保存截图
                         try {
                             const screenshotPath = path.join(
                                 ROOT_DIR,

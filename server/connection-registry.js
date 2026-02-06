@@ -12,17 +12,16 @@ class ConnectionRegistry extends EventEmitter {
         this.logger = logger;
         this.connections = new Set();
         this.messageQueues = new Map();
-        this.reconnectGraceTimer = null; // 新增：用于缓冲期计时的定时器
+        this.reconnectGraceTimer = null;
     }
 
     addConnection(websocket, clientInfo) {
-        // --- 核心修改：当新连接建立时，清除可能存在的"断开"警报 ---
+        // 当新连接建立时，清除可能存在的"断开"警报
         if (this.reconnectGraceTimer) {
             clearTimeout(this.reconnectGraceTimer);
             this.reconnectGraceTimer = null;
             this.logger.info("[Server] 在缓冲期内检测到新连接，已取消断开处理。");
         }
-        // --- 修改结束 ---
 
         this.connections.add(websocket);
         this.logger.info(
@@ -53,7 +52,6 @@ class ConnectionRegistry extends EventEmitter {
             this.messageQueues.clear();
             this.emit("connectionLost"); // 使用一个新的事件名，表示确认丢失
         }, 5000); // 5秒的缓冲时间
-        // --- 修改结束 ---
 
         this.emit("connectionRemoved", websocket);
     }

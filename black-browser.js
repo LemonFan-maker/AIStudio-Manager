@@ -75,7 +75,7 @@ class ConnectionManager extends EventTarget {
     this.reconnectAttempts++;
     setTimeout(() => {
       Logger.output(`正在进行第 ${this.reconnectAttempts} 次重连尝试...`);
-      this.establish().catch(() => {});
+      this.establish().catch(() => { });
     }, this.reconnectDelay);
   }
 }
@@ -199,9 +199,8 @@ class RequestProcessor {
       }
     }
     const queryString = queryParams.toString();
-    return `https://${this.targetDomain}/${pathSegment}${
-      queryString ? "?" + queryString : ""
-    }`;
+    return `https://${this.targetDomain}/${pathSegment}${queryString ? "?" + queryString : ""
+      }`;
   }
 
   _generateRandomString(length) {
@@ -446,9 +445,27 @@ class ProxySystem extends EventTarget {
 }
 
 async function initializeProxySystem() {
+  // 单例模式保护：防止代码被重复执行导致双重连接
+  if (window.__PROXY_SYSTEM_INSTANCE__) {
+    Logger.output("检测到旧的代理系统实例，正在清理...");
+    try {
+      if (
+        window.__PROXY_SYSTEM_INSTANCE__.connectionManager &&
+        window.__PROXY_SYSTEM_INSTANCE__.connectionManager.socket
+      ) {
+        window.__PROXY_SYSTEM_INSTANCE__.connectionManager.socket.close();
+      }
+    } catch (e) {
+      console.warn("清理旧连接失败:", e);
+    }
+    window.__PROXY_SYSTEM_INSTANCE__ = null;
+  }
+
   // 清理旧的日志
   document.body.innerHTML = "";
   const proxySystem = new ProxySystem();
+  window.__PROXY_SYSTEM_INSTANCE__ = proxySystem; // 保存实例引用
+
   try {
     await proxySystem.initialize();
   } catch (error) {
@@ -457,4 +474,9 @@ async function initializeProxySystem() {
   }
 }
 
-initializeProxySystem();
+// 确保页面加载完成后执行，且只执行一次
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initializeProxySystem);
+} else {
+  initializeProxySystem();
+}
