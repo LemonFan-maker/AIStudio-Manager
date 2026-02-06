@@ -101,22 +101,40 @@ export default function TokenStats() {
       byModel[name].total += log.tokens || 0;
 
       // Daily Stats
-      const date = new Date(log.timestamp).toLocaleDateString("en-US", {
-        month: "2-digit",
-        day: "2-digit",
-      });
-      if (!dailyMap[date]) dailyMap[date] = { date, total: 0, input: 0, output: 0 };
-      dailyMap[date].total += log.tokens || 0;
-      dailyMap[date].input += log.inputTokens || 0;
-      dailyMap[date].output += log.outputTokens || 0;
-      dailyMap[date][name] = (dailyMap[date][name] || 0) + (log.tokens || 0);
+      const logDate = new Date(log.timestamp);
+
+      // 统一使用本地时间构建排序键和显示文本
+      const year = logDate.getFullYear();
+      const monthVal = logDate.getMonth() + 1;
+      const dayVal = logDate.getDate();
+
+      const month = String(monthVal).padStart(2, '0');
+      const day = String(dayVal).padStart(2, '0');
+
+      const sortKey = `${year}-${month}-${day}`; // 2026-02-06 (本地时间)
+      const dateDisplay = `${month}/${day}`;     // 02/06 (本地时间)
+
+      if (!dailyMap[sortKey]) {
+        dailyMap[sortKey] = {
+          date: dateDisplay, // 显示用
+          sortKey: sortKey,  // 排序用
+          total: 0,
+          input: 0,
+          output: 0
+        };
+      }
+
+      dailyMap[sortKey].total += log.tokens || 0;
+      dailyMap[sortKey].input += log.inputTokens || 0;
+      dailyMap[sortKey].output += log.outputTokens || 0;
+      dailyMap[sortKey][name] = (dailyMap[sortKey][name] || 0) + (log.tokens || 0);
 
       const accId = log.account.toString();
       accountMap[accId] = (accountMap[accId] || 0) + (log.tokens || 0);
     });
 
     const dailyTrend = Object.values(dailyMap).sort(
-      (a: any, b: any) => new Date(a.date).getTime() - new Date(b.date).getTime()
+      (a: any, b: any) => a.sortKey.localeCompare(b.sortKey)
     );
 
     const accountPie = Object.entries(accountMap)

@@ -49,9 +49,204 @@
 
 body {
   @apply bg-background text-foreground;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* 自定义滚动条 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-border rounded-full;
+  transition: background-color 0.2s;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-muted-foreground/30;
+}
+
+/* 页面切换动画 */
+@keyframes page-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-page-in {
+  animation: page-fade-in 0.3s ease-out;
+}
+
+/* 脉冲动画 - 用于连接状态 */
+@keyframes pulse-ring {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(2);
+    opacity: 0;
+  }
+}
+
+.pulse-ring::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  background: inherit;
+  animation: pulse-ring 1.5s ease-out infinite;
+}
+
+/* 卡片悬浮效果 */
+.card-hover {
+  @apply transition-all duration-200;
+}
+
+.card-hover:hover {
+  @apply shadow-lg -translate-y-0.5;
+}
+
+/* 渐变背景 */
+.gradient-bg {
+  background: linear-gradient(135deg, 
+    hsl(var(--primary) / 0.1) 0%, 
+    hsl(var(--accent) / 0.05) 50%, 
+    hsl(var(--secondary) / 0.1) 100%
+  );
+}
+
+/* 加载骨架屏动画 */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--muted)) 0%,
+    hsl(var(--muted) / 0.5) 50%,
+    hsl(var(--muted)) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+}
+
+/* 表格行悬浮效果 */
+.table-row-hover {
+  @apply transition-colors duration-150;
+}
+
+.table-row-hover:hover {
+  @apply bg-muted/50;
+}
+
+/* 表单输入框聚焦效果 */
+input:focus,
+textarea:focus,
+select:focus {
+  @apply ring-2 ring-primary/20 border-primary outline-none;
+}
+
+/* 按钮点击效果 */
+button:active:not(:disabled) {
+  transform: scale(0.98);
+}
+
+/* 徽章闪烁效果 */
+@keyframes badge-pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.6;
+  }
+}
+
+.badge-pulse {
+  animation: badge-pulse 2s ease-in-out infinite;
+}
+
+/* 数字滚动效果占位 */
+.number-scroll {
+  @apply tabular-nums;
+}
+
+/* 状态点动画 */
+@keyframes status-pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 0.7;
+  }
+}
+
+.status-dot-animate {
+  animation: status-pulse 2s ease-in-out infinite;
+}
+
+/* 侧边栏过渡 */
+.sidebar-transition {
+  @apply transition-all duration-300 ease-in-out;
+}
+
+/* 图表容器 */
+.chart-container {
+  @apply relative overflow-hidden rounded-lg;
+}
+
+/* 空状态样式 */
+.empty-state {
+  @apply flex flex-col items-center justify-center py-12 text-center;
+}
+
+.empty-state-icon {
+  @apply h-16 w-16 text-muted-foreground/30 mb-4;
+}
+
+.empty-state-text {
+  @apply text-muted-foreground text-sm;
+}
+
+/* 标签页样式 */
+.tab-button {
+  @apply px-4 py-2 text-sm font-medium rounded-t-lg transition-colors;
+  @apply text-muted-foreground hover:text-foreground;
+  @apply border-b-2 border-transparent;
+}
+
+.tab-button-active {
+  @apply text-primary border-primary bg-primary/5;
+}
+
+/* 工具提示 */
+.tooltip {
+  @apply absolute z-50 px-2 py-1 text-xs rounded bg-foreground text-background;
+  @apply opacity-0 transition-opacity pointer-events-none;
+}
+
+.tooltip-parent:hover .tooltip {
+  @apply opacity-100;
 }
